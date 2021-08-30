@@ -25,6 +25,7 @@ class Bike:
 		"""Changes the direction"""
 		self.direction = direction
 
+
 class Grid:
 	def __init__(self):
 		"""Maintain the state of the grid"""
@@ -40,43 +41,16 @@ class Grid:
 		"""Checks if a player won"""
 		return False
 
-def main():
-	m = Main()
-	m.run()
-
-
-if __name__ == "__main__": main()
 
 class Window(QMainWindow):
 	def __init__(self):
 		super(Window, self).__init__()
 		self.resize(400, 400)
 		self.setWindowTitle("Light Cycle")
-		self.setStyleSheet("background-color: white")
-		self.rectangle = QWidget(self)
-		self.rectangle.resize(50, 80)
-		self.rectangle.setStyleSheet("background-color: green")
-		
-	def generate_start_pos():
-		return random.choice([[Vector2(15, 1), Vector2(15, 29)], [Vector2(15, 29), Vector2(15, 1)], [Vector2(1, 15), Vector2(29, 15)], [Vector2(29, 15), Vector2(1, 15)]])
-		
-	def run(self):
-		"""PyGame Main Loop"""
-		UPDATE = pygame.USEREVENT
-		pygame.time.set_timer(UPDATE, 750)
-		while True:
-			for i in pygame.event.get():
-				if i.type == pygame.QUIT: exit()
-				if i.type == UPDATE: self.update()
-
-			self.screen.fill((255, 255, 255))
-
-			pygame.draw.rect(self.screen, (0, 255, 0), (0, 0, 50, 80))
-			# CODE HERE
-			
-			pygame.display.update()
-			try: self.clock.tick(60)
-			except KeyboardInterrupt: exit()
+		self.setStyleSheet("background-color: blue;")
+		self.update_timer = QTimer(self)
+		self.update_timer.setInterval(750)
+		self.update_timer.start()
 
 	def update(self) -> None:
 		"""
@@ -90,5 +64,8 @@ class Window(QMainWindow):
 		return
 
 
-application, window = QApplication([]), Window()
-application.exec_()
+try:
+	application, window = QApplication([]), Window()
+	application.exec_()
+except KeyboardInterrupt:
+	exit()
