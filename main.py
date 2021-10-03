@@ -14,6 +14,12 @@ except ModuleNotFoundError:
 N = 30  # N is the number of squares on a side of the screen
 WIDTH = 20  # WIDTH is the size of a square in pixels
 
+from enum import Enum
+
+class Outcome(Enum):
+	none, player1, player2, draw = 0, 1, 2, 3
+
+
 class Bike:
 	def __init__(self, symbol, position, direction):
 		"""Bike Class"""
@@ -31,10 +37,11 @@ class Bike:
 	
 	def in_bounds(self) -> bool:
 		"""Returns True if bike is in bounds, False otherwise"""
-		return self.position[0] >= 0 and self.position[0] <= N and self.position[1] >= 0 and self.position[0] <= N
+		return self.position[0] >= 0 and self.position[0] < N and self.position[1] >= 0 and self.position[1] < N
 
 	def __repr__(self):
 		return f"{self.symbol} Bike at {self.position}"
+
 
 class Grid:
 	def __init__(self):
@@ -45,22 +52,38 @@ class Grid:
 	def placeMove(self, player: Bike) -> None:
 		"""Makes a move for player"""
 		#print(player.position[0], player.position[1]
-
 		self.squares[int(player.position[0])][int(player.position[1])] = player.symbol
 	
 	
-	def playerWon(self, player1, player2): # Playerwon function
-		"""Checks if a player won
-		TODO: If both players exit the board simultaneously (and some other stuff)"""
-		if not player1.in_bounds(): return player2
-		if not player2.in_bounds(): return player1
-		if player1.position == player2.position:
-			return player1, player2
-		if self.squares[player1.position[0]][player1.position[1]] != 0:
-			return player2
-		if self.squares[player2.position[0]][player2.position[1]] != 0:
-			return player1
-		return None
+	def playerWon(self, player1, player2):
+		"""Checks if a player won TODO: If both players exit the board simultaneously (and some other stuff)
+		"""
+		# 1. neither player has won: 0
+		# 2. player 1 won: 1
+		# 3. player 2 won: 2
+		# 4. both players tie: 3
+		# if player1.position == player2.position:
+		# 	return Outcome.draw
+		# check if in bounds
+		if not player1.in_bounds() and not player2.in_bounds():
+			return Outcome.draw
+		if not player1.in_bounds():
+			return Outcome.player2
+		if not player2.in_bounds():
+			return Outcome.player1
+		# one player touches another one
+		player1_position = {"x": int(player1.position[0]), "y": int(player1.position[1])}
+		player2_position = {"x": int(player2.position[0]), "y": int(player2.position[1])}
+		print(self.squares[player1_position["x"]][player1_position["y"]])
+		if self.squares[player1_position["x"]][player1_position["y"]] != ' ' and self.squares[player2_position["x"]][player2_position["y"]] != ' ':
+			print(player1_position)
+			print(self.squares[0][0])
+			return Outcome.draw
+		# if self.squares[player1.position[0]][player1.position[1]] != ' ':
+		# 	return Outcome.player2
+		# if self.squares[player2.position[0]][player2.position[1]] != ' ':
+		# 	return Outcome.player1
+		return Outcome.none
 
 	def paint_screen(self, screen):
 		"""draw every square in the grid onto the screen based on the symbol"""
@@ -85,6 +108,7 @@ class Main: # Main class
 		self.player1 = Bike("R", Vector2(0, -1), Vector2(0, 1)) # Set player1 in the top left corner
 		self.player2 = Bike("B", Vector2(N - 1, N), Vector2(0, -1)) # Set player2 in the bottom right corner
 		self.grid = Grid() # Set grid
+		self.running = True
 
 	def run(self): # The main
 		"""PyGame Main Loop"""
@@ -111,7 +135,7 @@ class Main: # Main class
 						self.player2.changeDirection(Vector2(1, 0))
 					if i.key == pygame.K_w and self.player2.direction != Vector2(0, 1):
 						self.player2.changeDirection(Vector2(0, -1))
-				if i.type == UPDATE: self.update()
+				if i.type == UPDATE and self.running: self.update()
 
 			self.screen.fill((255, 255, 255))
 			self.grid.paint_screen(self.screen)
@@ -126,15 +150,23 @@ class Main: # Main class
 			place move for player 1, place move for player 2
 			check if either player won or if it's a tie
 		"""
+		# Update the position
 		self.player1.update_position()
 		self.player2.update_position()
 
+		player_won = self.grid.playerWon(self.player1, self.player2)
+		if player_won != Outcome.none:
+			print(player_won)
+			self.running = False
+			return
 
-		# if self.player1.in_bounds():
+		# Update the grid
 		self.grid.placeMove(self.player1)
-		# if self.player2.in_bounds():
 		self.grid.placeMove(self.player2)
 
+		
+
+		
 
 		# for row in self.grid.squares:
 		# 	for square in row:
@@ -170,3 +202,5 @@ if __name__ == "__main__": main()
 					0
 					0
 					0"""
+
+# go backwards by pressing two keys
