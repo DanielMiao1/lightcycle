@@ -71,18 +71,25 @@ class Grid:
 			return Outcome.player2
 		if not player2.in_bounds():
 			return Outcome.player1
+
 		# one player touches another one
 		player1_position = {"x": int(player1.position[0]), "y": int(player1.position[1])}
 		player2_position = {"x": int(player2.position[0]), "y": int(player2.position[1])}
 		print(self.squares[player1_position["x"]][player1_position["y"]])
-		if self.squares[player1_position["x"]][player1_position["y"]] != ' ' and self.squares[player2_position["x"]][player2_position["y"]] != ' ':
-			print(player1_position)
-			print(self.squares[0][0])
+
+		p1_over = self.squares[player1_position["x"]][player1_position["y"]] != ' '
+		p2_over = self.squares[player2_position["x"]][player2_position["y"]] != ' '
+
+		if p1_over and p2_over:
 			return Outcome.draw
-		# if self.squares[player1.position[0]][player1.position[1]] != ' ':
-		# 	return Outcome.player2
-		# if self.squares[player2.position[0]][player2.position[1]] != ' ':
-		# 	return Outcome.player1
+
+		# If a player runs into another
+		if p1_over:
+			return Outcome.player2
+
+		elif p2_over:
+			return Outcome.player1
+
 		return Outcome.none
 
 	def paint_screen(self, screen):
@@ -135,7 +142,8 @@ class Main: # Main class
 						self.player2.changeDirection(Vector2(1, 0))
 					if i.key == pygame.K_w and self.player2.direction != Vector2(0, 1):
 						self.player2.changeDirection(Vector2(0, -1))
-				if i.type == UPDATE and self.running: self.update()
+				if i.type == UPDATE and self.running:
+					self.update()
 
 			self.screen.fill((255, 255, 255))
 			self.grid.paint_screen(self.screen)
@@ -156,7 +164,14 @@ class Main: # Main class
 
 		player_won = self.grid.playerWon(self.player1, self.player2)
 		if player_won != Outcome.none:
-			print(player_won)
+			
+			if player_won == Outcome.draw:
+				print("Tie game")
+			elif player_won == Outcome.player1:
+				print("Player 1 won")
+			elif player_won == Outcome.player2:
+				print("Player 2 won")
+
 			self.running = False
 			return
 
@@ -164,16 +179,16 @@ class Main: # Main class
 		self.grid.placeMove(self.player1)
 		self.grid.placeMove(self.player2)
 
-		
-
-		
-
 		# for row in self.grid.squares:
 		# 	for square in row:
 		# 		print(square, end=",")
 		# 	print()
 		# self.grid.playerWon(self.player1, self.player2)
 		# print(self.grid)
+	
+
+# panel with text on it for game over screen
+
 
 def main():
 	m = Main()

@@ -1,13 +1,12 @@
 [tool.poetry]
-name = "repl_pygame_lightcycle"
+name = "LightCycle"
 version = "0.1.0"
-description = ""
-authors = ["DanielMiao1 <danielmiao2019@icloud.com>"]
+description = "The game of lightcycle, implemented in Python 3 using PyGame"
+authors = ["Daniel Miao replit.com/@DanielMiao1 github.com/DanielMiao1", "Roy Yi replit.com/@royyi github.com/royyi"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
 pygame = "^2.0.1"
-PyQt5 = "^5.15.4"
 
 [tool.poetry.dev-dependencies]
 
