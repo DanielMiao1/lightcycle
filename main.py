@@ -26,6 +26,7 @@ class Bike:
 		self.position = position
 		self.symbol = symbol
 		self.direction = direction
+		self.direction_changed = False
 	
 	def update_position(self) -> tuple:
 		"""Gets the coordinate move"""
@@ -51,7 +52,6 @@ class Grid:
 
 	def placeMove(self, player: Bike) -> None:
 		"""Makes a move for player"""
-		#print(player.position[0], player.position[1]
 		self.squares[int(player.position[0])][int(player.position[1])] = player.symbol
 	
 	
@@ -75,7 +75,6 @@ class Grid:
 		# one player touches another one
 		player1_position = {"x": int(player1.position[0]), "y": int(player1.position[1])}
 		player2_position = {"x": int(player2.position[0]), "y": int(player2.position[1])}
-		print(self.squares[player1_position["x"]][player1_position["y"]])
 
 		p1_over = self.squares[player1_position["x"]][player1_position["y"]] != ' '
 		p2_over = self.squares[player2_position["x"]][player2_position["y"]] != ' '
@@ -126,22 +125,32 @@ class Main: # Main class
 				if i.type == pygame.QUIT: exit()
 				# Key presses
 				if i.type == pygame.KEYDOWN:
-					if i.key == pygame.K_LEFT and self.player1.direction != Vector2(1, 0):
-						self.player1.changeDirection(Vector2(-1, 0))
-					if i.key == pygame.K_RIGHT and self.player1.direction != Vector2(-1, 0):
-						self.player1.changeDirection(Vector2(1, 0))
-					if i.key == pygame.K_UP and self.player1.direction != Vector2(0, 1):
-						self.player1.changeDirection(Vector2(0, -1))
-					if i.key == pygame.K_DOWN and self.player1.direction != Vector2(0, -1):
-						self.player1.changeDirection(Vector2(0, 1))
-					if i.key == pygame.K_a and self.player2.direction != Vector2(1, 0):
-						self.player2.changeDirection(Vector2(-1, 0))
-					if i.key == pygame.K_s and self.player2.direction != Vector2(0, -1):
-						self.player2.changeDirection(Vector2(0, 1))
-					if i.key == pygame.K_d and self.player2.direction != Vector2(-1, 0):
-						self.player2.changeDirection(Vector2(1, 0))
-					if i.key == pygame.K_w and self.player2.direction != Vector2(0, 1):
-						self.player2.changeDirection(Vector2(0, -1))
+					if not self.player1.direction_changed:
+						if i.key == pygame.K_LEFT and self.player1.direction != Vector2(1, 0):
+							self.player1.changeDirection(Vector2(-1, 0))
+							self.player1.direction_changed = True
+						elif i.key == pygame.K_RIGHT and self.player1.direction != Vector2(-1, 0):
+							self.player1.changeDirection(Vector2(1, 0))
+							self.player1.direction_changed = True
+						elif i.key == pygame.K_UP and self.player1.direction != Vector2(0, 1):
+							self.player1.changeDirection(Vector2(0, -1))
+							self.player1.direction_changed = True
+						elif i.key == pygame.K_DOWN and self.player1.direction != Vector2(0, -1):
+							self.player1.changeDirection(Vector2(0, 1))
+							self.player1.direction_changed = True
+					if not self.player2.direction_changed:
+						if i.key == pygame.K_a and self.player2.direction != Vector2(1, 0):
+							self.player2.changeDirection(Vector2(-1, 0))
+							self.player2.direction_changed = True
+						elif i.key == pygame.K_s and self.player2.direction != Vector2(0, -1):
+							self.player2.changeDirection(Vector2(0, 1))
+							self.player2.direction_changed = True
+						elif i.key == pygame.K_d and self.player2.direction != Vector2(-1, 0):
+							self.player2.changeDirection(Vector2(1, 0))
+							self.player2.direction_changed = True
+						elif i.key == pygame.K_w and self.player2.direction != Vector2(0, 1):
+							self.player2.changeDirection(Vector2(0, -1))
+							self.player2.direction_changed = True
 				if i.type == UPDATE and self.running:
 					self.update()
 
@@ -157,10 +166,13 @@ class Main: # Main class
 			ask player 1 and player 2 for a move
 			place move for player 1, place move for player 2
 			check if either player won or if it's a tie
-		"""
+		"""	
 		# Update the position
 		self.player1.update_position()
 		self.player2.update_position()
+		
+		self.player1.direction_changed = False
+		self.player2.direction_changed = False
 
 		player_won = self.grid.playerWon(self.player1, self.player2)
 		if player_won != Outcome.none:
@@ -179,13 +191,6 @@ class Main: # Main class
 		self.grid.placeMove(self.player1)
 		self.grid.placeMove(self.player2)
 
-		# for row in self.grid.squares:
-		# 	for square in row:
-		# 		print(square, end=",")
-		# 	print()
-		# self.grid.playerWon(self.player1, self.player2)
-		# print(self.grid)
-	
 
 # panel with text on it for game over screen
 
