@@ -20,6 +20,41 @@ class Outcome(Enum):
 	none, player1, player2, draw = 0, 1, 2, 3
 
 
+class Button:
+	"""Button widget"""
+	def __init__(self, screen, text: str = "", pos: Vector2 = Vector2(0, 0), size: tuple = (20, 20), color: tuple or set or list = (255, 0, 0), button_color: tuple or set or list = (0, 255, 255)):
+		self.screen = screen
+		self.button = pygame.Surface(size)
+		self.button.fill(button_color)
+		self.rect = self.button.get_rect(center=tuple(pos))
+		self.button_text = text
+		self.font_size = 32
+		self.text_color = color
+		self.background_color = button_color
+		button_font = pygame.font.SysFont(None, self.font_size)
+		self.text = button_font.render(self.button_text, False, color)
+
+	def setBackgroundColor(self, color):
+		self.background_color = color
+		self.button.fill(color)
+	
+	def setTextColor(self, color):
+		self.text_color = color
+		self.text = pygame.font.SysFont(None, self.font_size).render(self.button_text, False, color)
+
+	def setText(self, text):
+		self.button_text = text
+		self.text = pygame.font.SysFont(None, self.font_size).render(text, False, self.text_color)
+
+	def clicked(self, pos):
+		return self.rect.collidepoint(*pos)
+
+	def paint_widget(self):
+		"""Paint the button to the screen"""
+		self.button.blit(self.text, ((self.rect.width - self.text.get_rect().width) // 2, (self.rect.height - self.text.get_rect().height) // 2))
+		self.screen.blit(self.button, self.rect)
+
+
 class Bike:
 	def __init__(self, symbol, position, direction):
 		"""Bike Class"""
@@ -79,7 +114,8 @@ class Grid:
 		p1_over = self.squares[player1_position["x"]][player1_position["y"]] != ' '
 		p2_over = self.squares[player2_position["x"]][player2_position["y"]] != ' '
 
-		if p1_over and p2_over:
+		# check if the head of player1 and player2 are at the same position
+		if (p1_over and p2_over) or player1_position == player2_position:
 			return Outcome.draw
 
 		# If a player runs into another
@@ -102,7 +138,10 @@ class Grid:
 				else:
 					color = (255, 255, 255)
 				pygame.draw.rect(screen, color, (i * WIDTH, j * WIDTH, WIDTH, WIDTH))
-		
+
+# title text
+# button (surface to click)
+
 class Main: # Main class
 	def __init__(self):
 		pygame.init() # Initialize PyGame
@@ -115,47 +154,62 @@ class Main: # Main class
 		self.player2 = Bike("B", Vector2(N - 1, N), Vector2(0, -1)) # Set player2 in the bottom right corner
 		self.grid = Grid() # Set grid
 		self.running = True
+		self.started = False
+		self.start_button = Button(self.screen, text="Start Game", pos=Vector2(WIDTH * N / 2, WIDTH * N / 2), size=(225, 75), color=(255, 255, 255), button_color=(0, 0, 0))
+		self.ending = Outcome.none
+		self.ending_text = pygame.font.SysFont(None, 30).render("Tie Game" if self.ending == Outcome.draw else "Player 1 wins" if self.ending == Outcome.player1 else "Player 2 wins", False, (0, 0, 0))
 
 	def run(self): # The main
 		"""PyGame Main Loop"""
 		UPDATE = pygame.USEREVENT
 		pygame.time.set_timer(UPDATE, 200)
 		while True:
-			for i in pygame.event.get():
-				if i.type == pygame.QUIT: exit()
-				# Key presses
-				if i.type == pygame.KEYDOWN:
-					if not self.player1.direction_changed:
-						if i.key == pygame.K_LEFT and self.player1.direction != Vector2(1, 0):
-							self.player1.changeDirection(Vector2(-1, 0))
-							self.player1.direction_changed = True
-						elif i.key == pygame.K_RIGHT and self.player1.direction != Vector2(-1, 0):
-							self.player1.changeDirection(Vector2(1, 0))
-							self.player1.direction_changed = True
-						elif i.key == pygame.K_UP and self.player1.direction != Vector2(0, 1):
-							self.player1.changeDirection(Vector2(0, -1))
-							self.player1.direction_changed = True
-						elif i.key == pygame.K_DOWN and self.player1.direction != Vector2(0, -1):
-							self.player1.changeDirection(Vector2(0, 1))
-							self.player1.direction_changed = True
-					if not self.player2.direction_changed:
-						if i.key == pygame.K_a and self.player2.direction != Vector2(1, 0):
-							self.player2.changeDirection(Vector2(-1, 0))
-							self.player2.direction_changed = True
-						elif i.key == pygame.K_s and self.player2.direction != Vector2(0, -1):
-							self.player2.changeDirection(Vector2(0, 1))
-							self.player2.direction_changed = True
-						elif i.key == pygame.K_d and self.player2.direction != Vector2(-1, 0):
-							self.player2.changeDirection(Vector2(1, 0))
-							self.player2.direction_changed = True
-						elif i.key == pygame.K_w and self.player2.direction != Vector2(0, 1):
-							self.player2.changeDirection(Vector2(0, -1))
-							self.player2.direction_changed = True
-				if i.type == UPDATE and self.running:
-					self.update()
+			if not self.started:
+				for i in pygame.event.get():
+					if i.type == pygame.MOUSEBUTTONDOWN:
+						if self.start_button.clicked(i.pos):
+							self.started = True
+			elif self.ending != Outcome.none:
+				self.screen.blit()
+			else:
+				for i in pygame.event.get():
+					if i.type == pygame.QUIT: exit()
+					# Key presses
+					if i.type == pygame.KEYDOWN:
+						if not self.player1.direction_changed:
+							if i.key == pygame.K_LEFT and self.player1.direction != Vector2(1, 0):
+								self.player1.changeDirection(Vector2(-1, 0))
+								self.player1.direction_changed = True
+							elif i.key == pygame.K_RIGHT and self.player1.direction != Vector2(-1, 0):
+								self.player1.changeDirection(Vector2(1, 0))
+								self.player1.direction_changed = True
+							elif i.key == pygame.K_UP and self.player1.direction != Vector2(0, 1):
+								self.player1.changeDirection(Vector2(0, -1))
+								self.player1.direction_changed = True
+							elif i.key == pygame.K_DOWN and self.player1.direction != Vector2(0, -1):
+								self.player1.changeDirection(Vector2(0, 1))
+								self.player1.direction_changed = True
+						if not self.player2.direction_changed:
+							if i.key == pygame.K_a and self.player2.direction != Vector2(1, 0):
+								self.player2.changeDirection(Vector2(-1, 0))
+								self.player2.direction_changed = True
+							elif i.key == pygame.K_s and self.player2.direction != Vector2(0, -1):
+								self.player2.changeDirection(Vector2(0, 1))
+								self.player2.direction_changed = True
+							elif i.key == pygame.K_d and self.player2.direction != Vector2(-1, 0):
+								self.player2.changeDirection(Vector2(1, 0))
+								self.player2.direction_changed = True
+							elif i.key == pygame.K_w and self.player2.direction != Vector2(0, 1):
+								self.player2.changeDirection(Vector2(0, -1))
+								self.player2.direction_changed = True
+					if i.type == UPDATE and self.running:
+						self.update()
 
 			self.screen.fill((255, 255, 255))
-			self.grid.paint_screen(self.screen)
+			if self.started:
+				self.grid.paint_screen(self.screen)
+			else:
+				self.start_button.paint_widget()
 			pygame.display.update()
 			try: self.clock.tick(60)
 			except KeyboardInterrupt: exit()
@@ -185,7 +239,9 @@ class Main: # Main class
 				print("Player 2 won")
 
 			self.running = False
+			self.ending = player_won
 			return
+		
 
 		# Update the grid
 		self.grid.placeMove(self.player1)
@@ -216,11 +272,13 @@ if __name__ == "__main__": main()
 # tie
 
 
-"""xx
+"""
+xx
  x
  x
 					0
 					0
-					0"""
+					0
+"""
 
 # go backwards by pressing two keys
