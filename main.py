@@ -55,6 +55,16 @@ class Button:
 		self.screen.blit(self.button, self.rect)
 
 
+# class EndScreen:
+# 	"""Ending Screen"""
+# 	def __init__(self, screen, outcome):
+# 		self.screen = screen
+# 		self.outcome = outcome
+	
+# 	def paint_widget(self):
+# 		# self.screen.blit()
+
+
 class Bike:
 	def __init__(self, symbol, position, direction):
 		"""Bike Class"""
@@ -157,7 +167,8 @@ class Main: # Main class
 		self.started = False
 		self.start_button = Button(self.screen, text="Start Game", pos=Vector2(WIDTH * N / 2, WIDTH * N / 2), size=(225, 75), color=(255, 255, 255), button_color=(0, 0, 0))
 		self.ending = Outcome.none
-		self.ending_text = pygame.font.SysFont(None, 30).render("Tie Game" if self.ending == Outcome.draw else "Player 1 wins" if self.ending == Outcome.player1 else "Player 2 wins", False, (0, 0, 0))
+		self.ending_text = pygame.font.SysFont(None, 40).render("Tie Game" if self.ending == Outcome.draw else "Player 1 wins" if self.ending == Outcome.player1 else "Player 2 wins", False, (0, 0, 0))
+		self.ending_text_rect = self.ending_text.get_rect(center=(WIDTH * N / 2, WIDTH * N / 2))
 
 	def run(self): # The main
 		"""PyGame Main Loop"""
@@ -169,8 +180,6 @@ class Main: # Main class
 					if i.type == pygame.MOUSEBUTTONDOWN:
 						if self.start_button.clicked(i.pos):
 							self.started = True
-			elif self.ending != Outcome.none:
-				self.screen.blit()
 			else:
 				for i in pygame.event.get():
 					if i.type == pygame.QUIT: exit()
@@ -210,6 +219,8 @@ class Main: # Main class
 				self.grid.paint_screen(self.screen)
 			else:
 				self.start_button.paint_widget()
+			if self.ending != Outcome.none:
+				self.screen.blit(self.ending_text, self.ending_text_rect)
 			pygame.display.update()
 			try: self.clock.tick(60)
 			except KeyboardInterrupt: exit()
