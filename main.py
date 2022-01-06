@@ -251,6 +251,8 @@ class Main: # Main class
 
 			self.running = False
 			self.ending = player_won
+			self.ending_text = pygame.font.SysFont(None, 40).render("Tie Game" if self.ending == Outcome.draw else "Player 1 wins" if self.ending == Outcome.player1 else "Player 2 wins", False, (0, 0, 0))
+			self.ending_text_rect = self.ending_text.get_rect(center=(WIDTH * N / 2, WIDTH * N / 2))
 			return
 		
 
